@@ -1,0 +1,182 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, TextInput, FlatList } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const Abas = createBottomTabNavigator();
+
+const Login = ({ navigation }) => {
+  const [nomeUsuario, setNomeUsuario] = useState('');
+  const [senhaUsuario, setSenhaUsuario] = useState('');
+
+  const realizarLogin = async () => {
+    const senhaArmazenada = await AsyncStorage.getItem(nomeUsuario);
+    if (senhaArmazenada === senhaUsuario) {
+      alert("Olá, está pronto pra escutar os hits do momento?");
+      navigation.navigate("Minhas Playlists"); // Nome atualizado
+    } else {
+      alert("Algo deu errado, tente novamente");
+    }
+  };
+
+  return (
+    <View>
+      <Text>Entrar</Text>
+      <TextInput placeholder="User" onChangeText={setNomeUsuario} />
+      <TextInput placeholder="Senha" secureTextEntry onChangeText={setSenhaUsuario} />
+      <Button title="Logar" onPress={realizarLogin} />
+      <Button title="Cadastrar" onPress={() => navigation.navigate("Cadastro")} />
+    </View>
+  );
+};
+
+const Cadastro = ({ navigation }) => {
+  const [novoUsuario, setNovoUsuario] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  
+  const realizarRegistro = async () => {
+    await AsyncStorage.setItem(novoUsuario, novaSenha);
+    alert("Bem vindo! Que sua experiência com a música seja extraordinária");
+    navigation.navigate("Login");
+  };
+
+  return (
+    <View>
+      <Text>Registrar-se</Text>
+      <TextInput placeholder="Novo user" onChangeText={setNovoUsuario} />
+      <TextInput placeholder="Nova senha" secureTextEntry onChangeText={setNovaSenha} />
+      <Button title="Cadastrar" onPress={realizarRegistro} />
+    </View>
+  );
+};
+
+const Playlists = ({ navigation }) => {
+  const [dadosPlaylists, setDadosPlaylists] = useState([]);
+
+  useEffect(() => {
+    carregarPlaylists();
+  }, []);
+
+  const carregarPlaylists = async () => {
+    const playlistsArmazenadas = await AsyncStorage.getItem('playlists');
+    setDadosPlaylists(playlistsArmazenadas ? JSON.parse(playlistsArmazenadas) : []);
+  };
+
+  return (
+    <View>
+      <Text>Minhas Playlists</Text>
+      <FlatList 
+        data={dadosPlaylists}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <View>
+            <Text onPress={() => navigation.navigate("Detalhes Playlist", { playlist: item })}>{item.nome}</Text>
+          </View>
+        )}
+      />
+      <Button title="Criar nova playlist" onPress={() => navigation.navigate("Criar Playlist")} />
+    </View>
+  );
+};
+
+const CriarPlaylist = ({ navigation }) => {
+  const [nomePlaylist, setNomePlaylist] = useState('');
+  const [dadosPlaylists, setDadosPlaylists] = useState([]);
+
+  const carregarPlaylists = async () => {
+    const playlistsArmazenadas = await AsyncStorage.getItem('playlists');
+    setDadosPlaylists(playlistsArmazenadas ? JSON.parse(playlistsArmazenadas) : []);
+  };
+
+  useEffect(() => {
+    carregarPlaylists();
+  }, []);
+
+  const salvarPlaylist = async () => {
+    const novaPlaylist = { id: Date.now().toString(), nome: nomePlaylist, musicas: [] };
+    const playlistsAtualizadas = [...dadosPlaylists, novaPlaylist];
+    setDadosPlaylists(playlistsAtualizadas);
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
+    alert("Playlist criada!");
+    navigation.navigate("Minhas Playlists"); // Nome atualizado
+  };
+
+  return (
+    <View>
+      <Text>Criar Nova Playlist</Text>
+      <TextInput
+        placeholder="Nome da Playlist"
+        value={nomePlaylist}
+        onChangeText={setNomePlaylist}
+      />
+      <Button title="Salvar Playlist" onPress={salvarPlaylist} />
+    </View>
+  );
+};
+
+const DetalhesPlaylist = ({ route, navigation }) => {
+  const { playlist } = route.params;
+  return (
+    <View>
+      <Text>{playlist.nome}</Text>
+      <FlatList
+        data={playlist.musicas}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => <Text>{item}</Text>}
+      />
+      <Button
+        title="Qual música quer colocar?"
+        onPress={() => navigation.navigate("Adicionar Música", { playlist })}
+      />
+    </View>
+  );
+};
+
+const AdicionarMusica = ({ route }) => {
+  const { playlist } = route.params || {};
+  const [tituloMusica, setTituloMusica] = useState('');
+
+  const adicionarMusica = async () => {
+    if (!playlist) return;
+
+    const playlistsAtualizadas = await AsyncStorage.getItem('playlists');
+    const parsedPlaylists = JSON.parse(playlistsAtualizadas);
+    
+    const playlistsModificadas = parsedPlaylists.map(pl => {
+      if (pl.id === playlist.id) {
+        pl.musicas.push(tituloMusica);
+      }
+      return pl;
+    });
+
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsModificadas));
+    alert("Música adicionada na playlist!");
+  };
+
+  return (
+    <View>
+      <Text>Adicionar Música</Text>
+      <TextInput
+        placeholder="Título da Música"
+        onChangeText={setTituloMusica}
+      />
+      <Button title="Adicionar" onPress={adicionarMusica} />
+    </View>
+  );
+};
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Abas.Navigator>
+        <Abas.Screen name="Login" component={Login} />
+        <Abas.Screen name="Cadastro" component={Cadastro} />
+        <Abas.Screen name="Minhas Playlists" component={Playlists} />
+        <Abas.Screen name="Criar Playlist" component={CriarPlaylist} />
+        <Abas.Screen name="Adicionar Música" component={AdicionarMusica} />
+        <Abas.Screen name="Detalhes Playlist" component={DetalhesPlaylist} />
+      </Abas.Navigator>
+    </NavigationContainer>
+  );
+}
