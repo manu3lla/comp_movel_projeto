@@ -1,167 +1,243 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, FlatList } from 'react-native';
+import { View, Text, Button, TextInput, FlatList, Alert, TouchableOpacity, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Abas = createBottomTabNavigator();
+const AbasNavegacao = createBottomTabNavigator();
 
-const Login = ({ navigation }) => {
-  const [nomeUsuario, setNomeUsuario] = useState('');
-  const [senhaUsuario, setSenhaUsuario] = useState('');
+const TelaLogin = ({ navigation }) => {
+  const [usuario, setUsuario] = useState('');
+  const [senha, setSenha] = useState('');
 
   const realizarLogin = async () => {
-    const senhaArmazenada = await AsyncStorage.getItem(nomeUsuario);
-    if (senhaArmazenada === senhaUsuario) {
-      alert("Olá, está pronto pra escutar os hits do momento?");
-      navigation.navigate("Minhas Playlists"); // Nome atualizado
+    const senhaSalva = await AsyncStorage.getItem(usuario);
+    if (senhaSalva === senha) {
+      Alert.alert("Sucesso", "Bem-vindo!");
+      navigation.navigate("Minhas Playlists");
     } else {
-      alert("Algo deu errado, tente novamente");
+      Alert.alert("Erro", "Usuário ou senha incorretos.");
     }
   };
 
   return (
-    <View>
-      <Text>Entrar</Text>
-      <TextInput placeholder="User" onChangeText={setNomeUsuario} />
-      <TextInput placeholder="Senha" secureTextEntry onChangeText={setSenhaUsuario} />
-      <Button title="Logar" onPress={realizarLogin} />
-      <Button title="Cadastrar" onPress={() => navigation.navigate("Cadastro")} />
+    <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
+      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Login</Text>
+      <TextInput
+        style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
+        placeholder="Usuário"
+        onChangeText={setUsuario}
+      />
+      <TextInput
+        style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
+        placeholder="Senha"
+        secureTextEntry
+        onChangeText={setSenha}
+      />
+      <Button title="Entrar" color="#ff69b4" onPress={realizarLogin} />
+      <Button title="Registrar" color="#ff69b4" onPress={() => navigation.navigate("Cadastro")} />
     </View>
   );
 };
 
-const Cadastro = ({ navigation }) => {
+const TelaCadastro = ({ navigation }) => {
   const [novoUsuario, setNovoUsuario] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
-  
-  const realizarRegistro = async () => {
+
+  const registrarUsuario = async () => {
     await AsyncStorage.setItem(novoUsuario, novaSenha);
-    alert("Bem vindo! Que sua experiência com a música seja extraordinária");
+    Alert.alert("Sucesso", "Cadastro realizado!");
     navigation.navigate("Login");
   };
 
   return (
-    <View>
-      <Text>Registrar-se</Text>
-      <TextInput placeholder="Novo user" onChangeText={setNovoUsuario} />
-      <TextInput placeholder="Nova senha" secureTextEntry onChangeText={setNovaSenha} />
-      <Button title="Cadastrar" onPress={realizarRegistro} />
+    <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
+      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Registrar-se</Text>
+      <TextInput
+        style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
+        placeholder="Novo Usuário"
+        onChangeText={setNovoUsuario}
+      />
+      <TextInput
+        style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
+        placeholder="Nova Senha"
+        secureTextEntry
+        onChangeText={setNovaSenha}
+      />
+      <Button title="Cadastrar" color="#ff69b4" onPress={registrarUsuario} />
     </View>
   );
 };
 
-const Playlists = ({ navigation }) => {
-  const [dadosPlaylists, setDadosPlaylists] = useState([]);
+const TelaPlaylists = ({ navigation }) => {
+  const [playlists, setPlaylists] = useState([]);
+
+  const carregarPlaylists = async () => {
+    const playlistsSalvas = await AsyncStorage.getItem('playlists');
+    if (playlistsSalvas) {
+      setPlaylists(JSON.parse(playlistsSalvas));
+    } else {
+      setPlaylists([]);
+    }
+  };
+
+  const excluirPlaylist = async (id) => {
+    const playlistsSalvas = await AsyncStorage.getItem('playlists');
+    const playlists = playlistsSalvas ? JSON.parse(playlistsSalvas) : [];
+    const playlistsAtualizadas = playlists.filter(pl => pl.id !== id);
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
+    Alert.alert("Sucesso", "Playlist excluída!");
+    carregarPlaylists();
+  };
 
   useEffect(() => {
     carregarPlaylists();
   }, []);
 
-  const carregarPlaylists = async () => {
-    const playlistsArmazenadas = await AsyncStorage.getItem('playlists');
-    setDadosPlaylists(playlistsArmazenadas ? JSON.parse(playlistsArmazenadas) : []);
-  };
-
   return (
-    <View>
-      <Text>Minhas Playlists</Text>
-      <FlatList 
-        data={dadosPlaylists}
-        keyExtractor={item => item.id}
+    <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
+      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Minhas Playlists</Text>
+      <FlatList
+        data={playlists}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View>
-            <Text onPress={() => navigation.navigate("Detalhes Playlist", { playlist: item })}>{item.nome}</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("Detalhes Playlist", { playlist: item })}>
+              <Text style={{ color: '#ffffff', fontSize: 18, padding: 10 }}>{item.nome}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => excluirPlaylist(item.id)}>
+              <Text style={{ color: 'red', textAlign: 'right', padding: 10 }}>Excluir</Text>
+            </TouchableOpacity>
           </View>
         )}
       />
-      <Button title="Criar nova playlist" onPress={() => navigation.navigate("Criar Playlist")} />
+      <Button title="Criar Nova Playlist" color="#ff69b4" onPress={() => navigation.navigate("Criar Playlist")} />
     </View>
   );
 };
 
-const CriarPlaylist = ({ navigation }) => {
-  const [nomePlaylist, setNomePlaylist] = useState('');
-  const [dadosPlaylists, setDadosPlaylists] = useState([]);
-
-  const carregarPlaylists = async () => {
-    const playlistsArmazenadas = await AsyncStorage.getItem('playlists');
-    setDadosPlaylists(playlistsArmazenadas ? JSON.parse(playlistsArmazenadas) : []);
-  };
+const TelaDetalhesPlaylist = ({ route, navigation }) => {
+  const { playlist } = route.params || {};
+  const [musicas, setMusicas] = useState([]);
 
   useEffect(() => {
-    carregarPlaylists();
-  }, []);
+    if (playlist) {
+      setMusicas(playlist.musicas || []);
+    }
+  }, [playlist]);
 
-  const salvarPlaylist = async () => {
-    const novaPlaylist = { id: Date.now().toString(), nome: nomePlaylist, musicas: [] };
-    const playlistsAtualizadas = [...dadosPlaylists, novaPlaylist];
-    setDadosPlaylists(playlistsAtualizadas);
-    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
-    alert("Playlist criada!");
-    navigation.navigate("Minhas Playlists"); // Nome atualizado
+  const removerMusica = async (musica) => {
+    const novaLista = [];
+    for (const m of musicas) {
+      if (m !== musica) {
+        novaLista.push(m);
+      }
+    }
+    setMusicas(novaLista);
+
+    const playlistsSalvas = await AsyncStorage.getItem('playlists');
+    const playlists = playlistsSalvas ? JSON.parse(playlistsSalvas) : [];
+    for (const pl of playlists) {
+      if (pl.id === playlist.id) {
+        pl.musicas = novaLista;
+      }
+    }
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlists));
+    Alert.alert("Sucesso", "Música removida!");
+  };
+
+  if (!playlist) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#121212' }}>
+        <Text style={{ color: '#ff69b4' }}>Playlist não encontrada</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
+      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>{playlist.nome}</Text>
+      <FlatList
+        data={musicas}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
+            <Image source={{ uri: 'https://via.placeholder.com/40' }} style={{ width: 40, height: 40, marginRight: 10 }} />
+            <Text style={{ color: '#ffffff', flex: 1 }}>{item}</Text>
+            <TouchableOpacity onPress={() => removerMusica(item)}>
+              <Text style={{ color: 'red' }}>Remover</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+      <Button title="Adicionar Música" color="#ff69b4" onPress={() => navigation.navigate("Adicionar Música", { playlist })} />
+    </View>
+  );
+};
+
+const TelaCriarPlaylist = ({ navigation }) => {
+  const [nomePlaylist, setNomePlaylist] = useState('');
+
+  const criarPlaylist = async () => {
+    const newPlaylist = {
+      id: Date.now().toString(),
+      nome: nomePlaylist,
+      musicas: []
+    };
+    const playlistsSalvas = await AsyncStorage.getItem('playlists');
+    const playlists = playlistsSalvas ? JSON.parse(playlistsSalvas) : [];
+    playlists.push(newPlaylist);
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlists));
+    Alert.alert("Sucesso", "Playlist criada!");
+    navigation.navigate("Minhas Playlists");
   };
 
   return (
-    <View>
-      <Text>Criar Nova Playlist</Text>
+    <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
+      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Criar Playlist</Text>
       <TextInput
+        style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
         placeholder="Nome da Playlist"
-        value={nomePlaylist}
         onChangeText={setNomePlaylist}
       />
-      <Button title="Salvar Playlist" onPress={salvarPlaylist} />
+      <Button title="Criar" color="#ff69b4" onPress={criarPlaylist} />
     </View>
   );
 };
 
-const DetalhesPlaylist = ({ route, navigation }) => {
-  const { playlist } = route.params;
-  return (
-    <View>
-      <Text>{playlist.nome}</Text>
-      <FlatList
-        data={playlist.musicas}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => <Text>{item}</Text>}
-      />
-      <Button
-        title="Qual música quer colocar?"
-        onPress={() => navigation.navigate("Adicionar Música", { playlist })}
-      />
-    </View>
-  );
-};
-
-const AdicionarMusica = ({ route }) => {
+const TelaAdicionarMusica = ({ route, navigation }) => {
   const { playlist } = route.params || {};
-  const [tituloMusica, setTituloMusica] = useState('');
+  const [musica, setMusica] = useState('');
 
   const adicionarMusica = async () => {
-    if (!playlist) return;
+    const novaLista = [];
+    for (const m of playlist.musicas) {
+      novaLista.push(m);
+    }
+    novaLista.push(musica);
 
-    const playlistsAtualizadas = await AsyncStorage.getItem('playlists');
-    const parsedPlaylists = JSON.parse(playlistsAtualizadas);
-    
-    const playlistsModificadas = parsedPlaylists.map(pl => {
+    const playlistsSalvas = await AsyncStorage.getItem('playlists');
+    const playlists = playlistsSalvas ? JSON.parse(playlistsSalvas) : [];
+    for (const pl of playlists) {
       if (pl.id === playlist.id) {
-        pl.musicas.push(tituloMusica);
+        pl.musicas = novaLista;
       }
-      return pl;
-    });
+    }
 
-    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsModificadas));
-    alert("Música adicionada na playlist!");
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlists));
+    Alert.alert("Sucesso", "Música adicionada!");
+    navigation.navigate("Detalhes Playlist", { playlist });
   };
 
   return (
-    <View>
-      <Text>Adicionar Música</Text>
+    <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
+      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Adicionar Música</Text>
       <TextInput
-        placeholder="Título da Música"
-        onChangeText={setTituloMusica}
+        style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
+        placeholder="Nome da Música"
+        onChangeText={setMusica}
       />
-      <Button title="Adicionar" onPress={adicionarMusica} />
+      <Button title="Adicionar" color="#ff69b4" onPress={adicionarMusica} />
     </View>
   );
 };
@@ -169,14 +245,14 @@ const AdicionarMusica = ({ route }) => {
 export default function App() {
   return (
     <NavigationContainer>
-      <Abas.Navigator>
-        <Abas.Screen name="Login" component={Login} />
-        <Abas.Screen name="Cadastro" component={Cadastro} />
-        <Abas.Screen name="Minhas Playlists" component={Playlists} />
-        <Abas.Screen name="Criar Playlist" component={CriarPlaylist} />
-        <Abas.Screen name="Adicionar Música" component={AdicionarMusica} />
-        <Abas.Screen name="Detalhes Playlist" component={DetalhesPlaylist} />
-      </Abas.Navigator>
+      <AbasNavegacao.Navigator>
+        <AbasNavegacao.Screen name="Login" component={TelaLogin} />
+        <AbasNavegacao.Screen name="Cadastro" component={TelaCadastro} />
+        <AbasNavegacao.Screen name="Minhas Playlists" component={TelaPlaylists} />
+        <AbasNavegacao.Screen name="Criar Playlist" component={TelaCriarPlaylist} />
+        <AbasNavegacao.Screen name="Adicionar Música" component={TelaAdicionarMusica} />
+        <AbasNavegacao.Screen name="Detalhes Playlist" component={TelaDetalhesPlaylist} />
+      </AbasNavegacao.Navigator>
     </NavigationContainer>
   );
 }
