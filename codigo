@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, TextInput, FlatList, Alert, TouchableOpacity, Image, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Vibration } from 'react-native';
 
 const Stack = createStackNavigator();
 const AbasNavegacao = createBottomTabNavigator();
@@ -30,6 +31,7 @@ const TelaLogin = ({ navigation }) => {
   const [senha, setSenha] = useState('');
 
   const realizarLogin = async () => {
+    Vibration.vibrate();
     const senhaSalva = await AsyncStorage.getItem(usuario);
     if (senhaSalva === senha) {
       Alert.alert("Sucesso", "Bem-vindo!");
@@ -64,6 +66,7 @@ const TelaCadastro = ({ navigation }) => {
   const [novaSenha, setNovaSenha] = useState('');
 
   const registrarUsuario = async () => {
+    Vibration.vibrate();
     await AsyncStorage.setItem(novoUsuario, novaSenha);
     Alert.alert("Sucesso", "Cadastro realizado!");
     navigation.navigate("Login");
@@ -101,6 +104,7 @@ const TelaPlaylists = ({ navigation }) => {
   }, []);
 
   const excluirPlaylist = async (id) => {
+    Vibration.vibrate();
     const playlistsAtualizadas = playlists.filter((pl) => pl.id !== id);
     setPlaylists(playlistsAtualizadas);
     await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
@@ -134,6 +138,7 @@ const TelaDetalhesPlaylist = ({ route, navigation }) => {
   const [musicas, setMusicas] = useState(playlist.musicas);
 
   const removerMusica = async (nomeMusica) => {
+    Vibration.vibrate();
     const playlistsSalvas = await AsyncStorage.getItem('playlists');
     const playlistsAtualizadas = JSON.parse(playlistsSalvas).map(pl => {
       if (pl.id === playlist.id) {
@@ -196,6 +201,7 @@ const TelaRecomendacoes = () => {
   }, []);
 
   const adicionarMusicaNaPlaylist = async (musica) => {
+    Vibration.vibrate();
     if (!playlistSelecionada) {
       Alert.alert("Erro", "Selecione uma playlist para adicionar a música.");
       return;
@@ -287,6 +293,7 @@ const TelaCriarPlaylist = ({ navigation }) => {
   }, []);
 
   const criarPlaylist = async () => {
+    Vibration.vibrate();
     const novaPlaylist = { id: Date.now().toString(), nome: nomePlaylist, musicas: [] };
     const playlistsAtualizadas = [...playlists, novaPlaylist];
     await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
@@ -311,6 +318,7 @@ const TelaAdicionarMusica = ({ route, navigation }) => {
   const [musicaNome, setMusicaNome] = useState('');
 
   const adicionarMusica = async () => {
+    Vibration.vibrate();
     const novaMusica = { nome: musicaNome };
     playlist.musicas.push(novaMusica);
 
