@@ -1,10 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, FlatList, Alert, TouchableOpacity, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, TextInput, FlatList, Alert, TouchableOpacity, Image, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const Stack = createStackNavigator();
 const AbasNavegacao = createBottomTabNavigator();
+
+const TelaCarregamento = ({ navigation }) => {
+  useEffect(() => {
+    setTimeout(() => {
+      navigation.replace('Login');
+    }, 3000);
+  }, [navigation]);
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#121212', justifyContent: 'center', alignItems: 'center' }}>
+      <Image 
+        source={require('./assets/spotify.jpg')}
+        style={{ width: 200, height: 200 }} 
+      />
+    </View>
+  );
+};
 
 const TelaLogin = ({ navigation }) => {
   const [usuario, setUsuario] = useState('');
@@ -14,7 +33,7 @@ const TelaLogin = ({ navigation }) => {
     const senhaSalva = await AsyncStorage.getItem(usuario);
     if (senhaSalva === senha) {
       Alert.alert("Sucesso", "Bem-vindo!");
-      navigation.navigate("Minhas Playlists");
+      navigation.replace("AbasNavegacao");
     } else {
       Alert.alert("Erro", "Usuário ou senha incorretos.");
     }
@@ -74,25 +93,19 @@ const TelaPlaylists = ({ navigation }) => {
 
   const carregarPlaylists = async () => {
     const playlistsSalvas = await AsyncStorage.getItem('playlists');
-    if (playlistsSalvas) {
-      setPlaylists(JSON.parse(playlistsSalvas));
-    } else {
-      setPlaylists([]);
-    }
-  };
-
-  const excluirPlaylist = async (id) => {
-    const playlistsSalvas = await AsyncStorage.getItem('playlists');
-    const playlists = playlistsSalvas ? JSON.parse(playlistsSalvas) : [];
-    const playlistsAtualizadas = playlists.filter(pl => pl.id !== id);
-    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
-    Alert.alert("Sucesso", "Playlist excluída!");
-    carregarPlaylists();
+    setPlaylists(playlistsSalvas ? JSON.parse(playlistsSalvas) : []);
   };
 
   useEffect(() => {
     carregarPlaylists();
   }, []);
+
+  const excluirPlaylist = async (id) => {
+    const playlistsAtualizadas = playlists.filter((pl) => pl.id !== id);
+    setPlaylists(playlistsAtualizadas);
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
+    Alert.alert("Sucesso", "Playlist excluída!");
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
@@ -118,80 +131,166 @@ const TelaPlaylists = ({ navigation }) => {
 
 const TelaDetalhesPlaylist = ({ route, navigation }) => {
   const { playlist } = route.params || {};
-  const [musicas, setMusicas] = useState([]);
+  const [musicas, setMusicas] = useState(playlist.musicas);
 
-  useEffect(() => {
-    if (playlist) {
-      setMusicas(playlist.musicas || []);
-    }
-  }, [playlist]);
-
-  const removerMusica = async (musica) => {
-    const novaLista = musicas.filter((m) => m.nome !== musica.nome);
-    setMusicas(novaLista);
-
+  const removerMusica = async (nomeMusica) => {
     const playlistsSalvas = await AsyncStorage.getItem('playlists');
-    const playlists = playlistsSalvas ? JSON.parse(playlistsSalvas) : [];
-    const playlistsAtualizadas = playlists.map(pl => {
+    const playlistsAtualizadas = JSON.parse(playlistsSalvas).map(pl => {
       if (pl.id === playlist.id) {
-        return { ...pl, musicas: novaLista };
+        return { ...pl, musicas: pl.musicas.filter(musica => musica.nome !== nomeMusica) };
       }
       return pl;
     });
 
     await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
+    setMusicas(musicas.filter(musica => musica.nome !== nomeMusica));
     Alert.alert("Sucesso", "Música removida!");
   };
 
-  if (!playlist) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#121212' }}>
-        <Text style={{ color: '#ff69b4' }}>Playlist não encontrada</Text>
-      </View>
-    );
-  }
+  const abrirNoYoutube = (nomeMusica) => {
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(nomeMusica)}`;
+    Linking.openURL(url);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
       <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>{playlist.nome}</Text>
+
       <FlatList
         data={musicas}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
-            <Image source={{ uri: 'https://via.placeholder.com/40' }} style={{ width: 40, height: 40, marginRight: 10 }} />
+            <Image
+              source={{ uri: `https://via.placeholder.com/40/ff69b4/ffffff?text=${index + 1}` }}
+              style={{ width: 40, height: 40, marginRight: 10 }}
+            />
             <Text style={{ color: '#ffffff', flex: 1 }}>{item.nome}</Text>
-            <TouchableOpacity onPress={() => removerMusica(item)}>
+            <TouchableOpacity onPress={() => removerMusica(item.nome)}>
               <Text style={{ color: 'red', marginRight: 10 }}>Remover</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => Linking.openURL(item.link)}>
-              <Text style={{ color: '#ff69b4' }}>YouTube</Text>
+            <TouchableOpacity onPress={() => abrirNoYoutube(item.nome)}>
+              <Text style={{ color: '#1DB954', marginRight: 10 }}>Abrir no YouTube</Text>
             </TouchableOpacity>
           </View>
         )}
       />
       <Button title="Adicionar Música" color="#ff69b4" onPress={() => navigation.navigate("Adicionar Música", { playlist })} />
+      <Button title="Voltar" color="#ff69b4" onPress={() => navigation.goBack()} />
+    </View>
+  );
+};
+
+const TelaRecomendacoes = () => {
+  const [playlists, setPlaylists] = useState([]);
+  const [playlistSelecionada, setPlaylistSelecionada] = useState(null);
+
+  useEffect(() => {
+    const carregarPlaylists = async () => {
+      const playlistsSalvas = await AsyncStorage.getItem('playlists');
+      if (playlistsSalvas) {
+        setPlaylists(JSON.parse(playlistsSalvas));
+      }
+    };
+    carregarPlaylists();
+  }, []);
+
+  const adicionarMusicaNaPlaylist = async (musica) => {
+    if (!playlistSelecionada) {
+      Alert.alert("Erro", "Selecione uma playlist para adicionar a música.");
+      return;
+    }
+    const musicaExistente = playlistSelecionada.musicas.some(m => m.nome === musica.nome);
+    if (musicaExistente) {
+      Alert.alert("Erro", "Essa música já está na playlist.");
+      return;
+    }
+    const playlistsAtualizadas = playlists.map((pl) => {
+      if (pl.id === playlistSelecionada.id) {
+        return { ...pl, musicas: [...pl.musicas, musica] };
+      }
+      return pl;
+    });
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
+    setPlaylists(playlistsAtualizadas);
+    Alert.alert("Sucesso", "Música adicionada à playlist!");
+  };
+
+  const recomendacoes = [
+    { nome: 'Cherish - Illit', linkYoutube: 'https://www.youtube.com/watch?v=tbDGl7jEazA', id: 1 },
+    { nome: 'Drama - Aespa', linkYoutube: 'https://www.youtube.com/watch?v=D8VEhcPeSlc', id: 2 },
+    { nome: 'Spicy - Aespa', linkYoutube: 'https://www.youtube.com/watch?v=Os_heh8vPfs', id: 3 }
+  ];
+
+  const abrirNoYoutube = (nomeMusica) => {
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(nomeMusica)}`;
+    Linking.openURL(url);
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
+      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Recomendações</Text>
+
+      <View style={{ marginVertical: 16 }}>
+        <Text style={{ color: '#fff', fontSize: 18 }}>Selecione uma Playlist:</Text>
+        <FlatList
+          data={playlists}
+          horizontal
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => setPlaylistSelecionada(item)}>
+              <Text style={{
+                color: '#fff', padding: 10, backgroundColor: playlistSelecionada?.id === item.id ? '#ff69b4' : '#333',
+                borderRadius: 5, marginRight: 8
+              }}>
+                {item.nome}
+              </Text>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.id}
+        />
+      </View>
+
+      <FlatList
+        data={recomendacoes}
+        renderItem={({ item, index }) => (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+            <Image
+              source={{ uri: `https://via.placeholder.com/40/ff69b4/ffffff?text=${index + 1}` }}
+              style={{ width: 40, height: 40, marginRight: 10 }}
+            />
+            <Text style={{ color: '#fff', flex: 1 }}>{item.nome}</Text>
+            <TouchableOpacity onPress={() => abrirNoYoutube(item.nome)}>
+              <Text style={{ color: '#1DB954', marginRight: 10 }}>Abrir no YouTube</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => adicionarMusicaNaPlaylist({ nome: item.nome })}>
+              <Text style={{ color: '#ff69b4', marginRight: 10 }}>Adicionar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        keyExtractor={(item) => item.id.toString()}
+      />
     </View>
   );
 };
 
 
-
 const TelaCriarPlaylist = ({ navigation }) => {
   const [nomePlaylist, setNomePlaylist] = useState('');
+  const [playlists, setPlaylists] = useState([]);
+
+  useEffect(() => {
+    const carregarPlaylists = async () => {
+      const playlistsSalvas = await AsyncStorage.getItem('playlists');
+      setPlaylists(playlistsSalvas ? JSON.parse(playlistsSalvas) : []);
+    };
+    carregarPlaylists();
+  }, []);
 
   const criarPlaylist = async () => {
-    const newPlaylist = {
-      id: Date.now().toString(),
-      nome: nomePlaylist,
-      musicas: []
-    };
-    const playlistsSalvas = await AsyncStorage.getItem('playlists');
-    const playlists = playlistsSalvas ? JSON.parse(playlistsSalvas) : [];
-    playlists.push(newPlaylist);
-    await AsyncStorage.setItem('playlists', JSON.stringify(playlists));
-    Alert.alert("Sucesso", "Playlist criada!");
-    navigation.navigate("Minhas Playlists");
+    const novaPlaylist = { id: Date.now().toString(), nome: nomePlaylist, musicas: [] };
+    const playlistsAtualizadas = [...playlists, novaPlaylist];
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
+    navigation.navigate('Playlists');
   };
 
   return (
@@ -208,26 +307,18 @@ const TelaCriarPlaylist = ({ navigation }) => {
 };
 
 const TelaAdicionarMusica = ({ route, navigation }) => {
-  const { playlist } = route.params || {};
-  const [musica, setMusica] = useState('');
+  const { playlist } = route.params;
+  const [musicaNome, setMusicaNome] = useState('');
 
   const adicionarMusica = async () => {
-  const novaMusica = { nome: musica, link: `https://www.youtube.com/results?search_query=${encodeURIComponent(musica)}` };
+    const novaMusica = { nome: musicaNome };
+    playlist.musicas.push(novaMusica);
 
-  const playlistsSalvas = await AsyncStorage.getItem('playlists');
-  const playlists = playlistsSalvas ? JSON.parse(playlistsSalvas) : [];
-  const playlistsAtualizadas = playlists.map(pl => {
-    if (pl.id === playlist.id) {
-      return { ...pl, musicas: [...pl.musicas, novaMusica] };
-    }
-    return pl;
-  });
-
-  await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
-  Alert.alert("Sucesso", "Música adicionada!");
-  navigation.navigate("Detalhes Playlist", { playlist: { ...playlist, musicas: [...playlist.musicas, novaMusica] } });
-};
-
+    const playlistsSalvas = await AsyncStorage.getItem('playlists');
+    const playlistsAtualizadas = JSON.parse(playlistsSalvas).map(pl => pl.id === playlist.id ? playlist : pl);
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
+    navigation.goBack();
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
@@ -235,24 +326,37 @@ const TelaAdicionarMusica = ({ route, navigation }) => {
       <TextInput
         style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
         placeholder="Nome da Música"
-        onChangeText={setMusica}
+        onChangeText={setMusicaNome}
       />
-      <Button title="Adicionar" color="#ff69b4" onPress={adicionarMusica} />
+      <Button title="Adicionar Música" color="#ff69b4" onPress={adicionarMusica} />
+      <Button title="Voltar" color="#ff69b4" onPress={() => navigation.goBack()} />
     </View>
   );
 };
 
-export default function App() {
+const Abas = () => {
+  return (
+    <AbasNavegacao.Navigator>
+      <AbasNavegacao.Screen name="Playlists" component={TelaPlaylists} />
+      <AbasNavegacao.Screen name="Recomendações" component={TelaRecomendacoes} />
+    </AbasNavegacao.Navigator>
+  );
+};
+const App = () => {
   return (
     <NavigationContainer>
-      <AbasNavegacao.Navigator>
-        <AbasNavegacao.Screen name="Login" component={TelaLogin} />
-        <AbasNavegacao.Screen name="Cadastro" component={TelaCadastro} />
-        <AbasNavegacao.Screen name="Minhas Playlists" component={TelaPlaylists} />
-        <AbasNavegacao.Screen name="Criar Playlist" component={TelaCriarPlaylist} />
-        <AbasNavegacao.Screen name="Adicionar Música" component={TelaAdicionarMusica} />
-        <AbasNavegacao.Screen name="Detalhes Playlist" component={TelaDetalhesPlaylist} />
-      </AbasNavegacao.Navigator>
+      <Stack.Navigator initialRouteName="TelaCarregamento">
+        <Stack.Screen name="TelaCarregamento" component={TelaCarregamento} options={{ headerShown: false }} />
+        <Stack.Screen name="Login" component={TelaLogin} />
+        <Stack.Screen name="Cadastro" component={TelaCadastro} />
+        <Stack.Screen name="AbasNavegacao" component={Abas} options={{ headerShown: false }} />
+        <Stack.Screen name="Criar Playlist" component={TelaCriarPlaylist} />
+        <Stack.Screen name="Detalhes Playlist" component={TelaDetalhesPlaylist} />
+        <Stack.Screen name="Adicionar Música" component={TelaAdicionarMusica} />
+        <Stack.Screen name="Recomendações" component={TelaRecomendacoes} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
-}
+};
+
+export default App;
