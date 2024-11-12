@@ -1,18 +1,19 @@
-import {NavigationContainer} from '@react-navigation/native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {createStackNavigator} from '@react-navigation/stack';
-import React, {useState, useEffect, useCallback} from 'react';
-import {View, Text, Button, TextInput, FlatList, Alert, TouchableOpacity, Image, Linking} from 'react-native';
+//importando bibliotecas e bibliotecas do react
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, Button, TextInput, FlatList, Alert, TouchableOpacity, Image, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Vibration} from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
+import { Vibration } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 //criando o stack pra navegar entre as telas em modo de pilha
 const Stack = createStackNavigator();
 //tab navigator serve para navegar nas abas
-const navegar = createBottomTabNavigator();
+const AbasNavegacao = createBottomTabNavigator();
 
-const carregar = ({ navigation }) => {
+const Telacarrega = ({ navigation }) => {
   useEffect(() => { //timer de 3 segundos pra redirecionar o usuario pro login
     setTimeout(() => {
       navigation.replace('Login'); //navegando pra tela de login
@@ -29,7 +30,7 @@ const carregar = ({ navigation }) => {
   );
 };
 //tela de login
-const logar = ({ navigation }) => {
+const Telalogar = ({ navigation }) => {
   const [usuario, setUsuario] = useState(''); //armazenando nome do usuario
   const [senha, setSenha] = useState('');
 //armazenando senha
@@ -37,10 +38,10 @@ const logar = ({ navigation }) => {
     Vibration.vibrate(); //vibra quando clica
     const senhaSalva = await AsyncStorage.getItem(usuario); //pega senha da memoria
     if (senhaSalva === senha) { //verifica se senha esta correta e vai pra pag principal do programa
-      Alert.alert("bem vindo");
-      navigation.replace("navegar");
+      Alert.alert("bem vindo ao nosso aplicativo");
+      navigation.replace("AbasNavegacao");
     } else {
-      Alert.alert("Erro", "Usuário ou senha incorretos.");
+      Alert.alert("senha ou usuario errados");
     }
   };
 
@@ -58,20 +59,19 @@ const logar = ({ navigation }) => {
         secureTextEntry
         onChangeText={setSenha}
       />
-      <Button title="entrar" color="#ff69b4" onPress={realizarLogin} />
-      <Button title="registrar" color="#ff69b4" onPress={() => navigation.navigate("Cadastro")} />
+      <Button title="Logar" color="#ff69b4" onPress={realizarLogin} />
+      <Button title="Cadastrar" color="#ff69b4" onPress={() => navigation.navigate("Cadastro")} />
     </View>
   );
 };
 //funcao pra cadastrar
-const cadastrar = ({ navigation }) => {
+const TelaCadastro = ({ navigation }) => {
   const [novoUsuario, setNovoUsuario] = useState(''); //pega nome
   const [novaSenha, setNovaSenha] = useState(''); //pega senha
 
   const registrarUsuario = async () => {
     Vibration.vibrate(); //vibra quando clicar
     await AsyncStorage.setItem(novoUsuario, novaSenha); //salva usuario e senha no storage
-    Alert.alert("cadastro realizado");
     navigation.navigate("Login"); //vai pra tela de login
   };
 
@@ -80,41 +80,40 @@ const cadastrar = ({ navigation }) => {
       <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Registrar-se</Text>
       <TextInput
         style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
-        placeholder="novo user"
+        placeholder="usuario"
         onChangeText={setNovoUsuario}
       />
       <TextInput
         style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
-        placeholder="nova senha"
+        placeholder="senha"
         secureTextEntry
         onChangeText={setNovaSenha}
       />
-      <Button title="cadastrar" color="#ff69b4" onPress={registrarUsuario} />
+      <Button title="Cadastrar" color="#ff69b4" onPress={registrarUsuario} />
     </View>
   );
 };
 //tela que lista as playlists
-const playlists = ({ navigation }) => {
-  const [playlists, setandoplaylists] = useState([]);
+const TelaPlaylists = ({ navigation }) => {
+  const [playlists, setPlaylists] = useState([]);
 
   useFocusEffect(
     useCallback(() => {
-      const carregamento = async () => {
+      const carregarPlaylists = async () => {
         //carrega playlists salvas na memoria
-        const salvas = await AsyncStorage.getItem('playlists');
+        const playlistsSalvas = await AsyncStorage.getItem('playlists');
         //se nao for nulo ele transforma as playlists de JSON para um objeto, caso contrario ele diz que nao tem playlists salvas
-        setandoplaylists(salvas ? JSON.parse(salvas) : []);
+        setPlaylists(playlistsSalvas ? JSON.parse(playlistsSalvas) : []);
       };
-      carregamento(); //carrega as informacoes
+      carregarPlaylists(); //carrega as informacoes
     }, [])
   );
 //funcao pra excluir a playlist
   const excluirPlaylist = async (id) => {
     Vibration.vibrate(); //vibracao ao excluir a playlist
-    const attplay = playlists.filter((pl) => pl.id !== id); //filtra qual playlist sera excluida pelo id
-    setandoplaylists(attplay); //atualiza lista
-    await AsyncStorage.setItem('playlists', JSON.stringify(attplay)); //salva na memoria
-    Alert.alert("nova playlist cadastrada!");
+    const playlistsAtualizadas = playlists.filter((pl) => pl.id !== id); //filtra qual playlist sera excluida pelo id
+    setPlaylists(playlistsAtualizadas); //atualiza lista
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas)); //salva na memoria
   };
   return ( //style da tela de playlists
     <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
@@ -133,35 +132,34 @@ const playlists = ({ navigation }) => {
           </View>
         )}
       />
-      <Button title="criar playlist" color="#ff69b4" onPress={() => navigation.navigate("criaplay")} />
+      <Button title="criar playlist" color="#ff69b4" onPress={() => navigation.navigate("Criar Playlist")} />
     </View>
   );
 };
 //detalhes da playlist especifica
-const detalhesDaPlaylist = ({ route, navigation }) => {
+const TelaDetalhesPlaylist = ({ route, navigation }) => {
   const { playlist } = route.params || {}; //pega qual playlist foi selecionada
-  const [musicas, musica] = useState(playlist.musicas); //pega musicas da playlist
+  const [musicas, setMusicas] = useState(playlist.musicas); //pega musicas da playlist
 //funcao de remover musica
-  const removemus = async (nomemus) => {
+  const removerMusica = async (nomeMusica) => {
     Vibration.vibrate(); //vibra quando removemos
-    const salvas = await AsyncStorage.getItem('playlists'); //pega playlists salvas
-    const attplay = JSON.parse(salvas).map(pl => { //atualiza apos remover (confere se eh essa mesma ou nao antes de remover)
+    const playlistsSalvas = await AsyncStorage.getItem('playlists'); //pega playlists salvas
+    const playlistsAtualizadas = JSON.parse(playlistsSalvas).map(pl => { //atualiza apos remover (confere se eh essa mesma ou nao antes de remover)
       if (pl.id === playlist.id) {
-        return { ...pl, musicas: pl.musicas.filter(musica => musica.nome !== nomemus) };
+        return { ...pl, musicas: pl.musicas.filter(musica => musica.nome !== nomeMusica) };
       }
       return pl;
-    });//avisa que musica foi removida
-    await AsyncStorage.setItem('playlists', JSON.stringify(attplay));
-    musica(musicas.filter(musica => musica.nome !== nomemus));
-    Alert.alert("musica removida com sucesso");
+    });
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
+    setMusicas(musicas.filter(musica => musica.nome !== nomeMusica)); //avisa que musica foi removida
   };
 //pega nome que foi inserido e coloca no link pra redirecionar pro youtube
-  const abriryoutube = (nomemus) => {
-    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(nomemus)}`;
+  const abriytb = (nomeMusica) => {
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(nomeMusica)}`;
     Linking.openURL(url);
   };
 
-  return (
+  return ( //style da tela
     <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
       <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>{playlist.nome}</Text>
 
@@ -175,76 +173,75 @@ const detalhesDaPlaylist = ({ route, navigation }) => {
               style={{ width: 40, height: 40, marginRight: 10 }}
             />
             <Text style={{ color: '#ffffff', flex: 1 }}>{item.nome}</Text>
-            <TouchableOpacity onPress={() => removemus(item.nome)}>
+            <TouchableOpacity onPress={() => removerMusica(item.nome)}>
               <Text style={{ color: 'red', marginRight: 10 }}>Remover</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => abriryoutube(item.nome)}>
+            <TouchableOpacity onPress={() => abriytb(item.nome)}>
               <Text style={{ color: '#ff69b4', marginRight: 10 }}>Abrir no YouTube</Text>
             </TouchableOpacity>
           </View>
         )}
       />
-      <Button title="adicionar musica" color="#ff69b4" onPress={() => navigation.navigate("adicionar musica", { playlist })} />
+      <Button title="+" color="#ff69b4" onPress={() => navigation.navigate("Adicionar Música", { playlist })} />
       <Button title="voltar" color="#ff69b4" onPress={() => navigation.goBack()} />
     </View>
   );
 };
 //tela de recomendacoes de musicas que podem ser adicionadas na playlist
 const TelaRecomendacoes = () => {
-  const [playlists, setandoplaylists] = useState([]); //pega playlists e playlist escolhida
-  const [playlistescolhida, setandoplaylistescolhida] = useState(null);
+  const [playlists, setPlaylists] = useState([]); //pega playlists e playlist escolhida
+  const [playlistSelecionada, setPlaylistSelecionada] = useState(null);
 
   useEffect(() => {
     //carrega playlists salvas na memoria ao abrir a tela
-    const carregamento = async () => {
-      const salvas = await AsyncStorage.getItem('playlists');
-      if (salvas) {
-        setandoplaylists(JSON.parse(salvas));
+    const carregarPlaylists = async () => {
+      const playlistsSalvas = await AsyncStorage.getItem('playlists');
+      if (playlistsSalvas) {
+        setPlaylists(JSON.parse(playlistsSalvas));
       }
     };
-    carregamento();
+    carregarPlaylists();
   }, []);
 //adiciona a musica na playlist que foi selecionada, se nenhuma for ele avisa
   const adicionarMusicaNaPlaylist = async (musica) => {
     Vibration.vibrate(); //vibra quando adicionamos
-    if (!playlistescolhida) {
+    if (!playlistSelecionada) {
       Alert.alert("nenhuma playlist selecionada");
       return;
     }
-    const musicaatual =  playlistescolhida.musicas.some(m => m.nome === musica.nome); //se musica ja foi adicionada ele avisa
-    if (musicaatual) {
-      Alert.alert("musica ja esta na playlist!");
+    const musicaExistente = playlistSelecionada.musicas.some(m => m.nome === musica.nome); //se musica ja foi adicionada ele avisa
+    if (musicaExistente) {
+      Alert.alert("música ja esta na playlist");
       return;
     }
     //atualiza playlist com a musica escolhida na playlist especifica
-    const attplay = playlists.map((pl) => {
-      if (pl.id === playlistescolhida.id) {
+    const playlistsAtualizadas = playlists.map((pl) => {
+      if (pl.id === playlistSelecionada.id) {
         return { ...pl, musicas: [...pl.musicas, musica] };
       }
       return pl;
     });
     //salva na memoria a atualizacao
-    await AsyncStorage.setItem('playlists', JSON.stringify(attplay));
-    setandoplaylists(attplay);
-    Alert.alert("musica adicionada!");
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
+    setPlaylists(playlistsAtualizadas);
   };
 //lista de musicas recomendadas + link
   const recomendacoes = [
-    { nome: 'Cherish - Illit', linkYoutube: 'https://www.youtube.com/watch?v=tbDGl7jEazA', id: 1 },
-    { nome: 'Drama - Aespa', linkYoutube: 'https://www.youtube.com/watch?v=D8VEhcPeSlc', id: 2 },
-    { nome: 'Spicy - Aespa', linkYoutube: 'https://www.youtube.com/watch?v=Os_heh8vPfs', id: 3 },
-    { nome: 'Click Clack - BABYMONSTER', linkYoutube: 'https://www.youtube.com/watch?v=frV8cZ_yA_4', id: 4 },
-    { nome: 'No Doubt - ENHYPEN', linkYoutube: 'https://www.youtube.com/watch?v=rDolt3jJRsM', id: 5 },
-    { nome: '1-800-hot-n-fun - LE SSERAFIM', linkYoutube: 'https://www.youtube.com/watch?v=gZuKmC_cDPA', id: 6 },
-    { nome: 'ENHYPEN - Brought The Heat Back', linkYoutube: 'https://www.youtube.com/watch?v=DUTw0swj13A', id: 7 },
+    { nome: 'Cherish - Illit', linkytb: 'https://www.youtube.com/watch?v=tbDGl7jEazA', id: 1 },
+    { nome: 'Drama - Aespa', linkytb: 'https://www.youtube.com/watch?v=D8VEhcPeSlc', id: 2 },
+    { nome: 'Spicy - Aespa', linkytb: 'https://www.youtube.com/watch?v=Os_heh8vPfs', id: 3 },
+    { nome: 'Click Clack - BABYMONSTER', linkytb: 'https://www.youtube.com/watch?v=frV8cZ_yA_4', id: 4 },
+    { nome: 'No Doubt - ENHYPEN', linkytb: 'https://www.youtube.com/watch?v=rDolt3jJRsM', id: 5 },
+    { nome: '1-800-hot-n-fun - LE SSERAFIM', linkytb: 'https://www.youtube.com/watch?v=gZuKmC_cDPA', id: 6 },
+    { nome: 'ENHYPEN - Brought The Heat Back', linkytb: 'https://www.youtube.com/watch?v=DUTw0swj13A', id: 7 },
   ];
 //abre no youtube com o link correto
-  const abriryoutube = (nomemus) => {
-    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(nomemus)}`;
+  const abriytb = (nomeMusica) => {
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(nomeMusica)}`;
     Linking.openURL(url);
   };
 
-  return ( //estilo da tela (css)
+  return ( //style da tela de recomendacoes
     <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
       <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Recomendações</Text>
 
@@ -254,9 +251,9 @@ const TelaRecomendacoes = () => {
           data={playlists}
           horizontal
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => setandoplaylistescolhida(item)}>
+            <TouchableOpacity onPress={() => setPlaylistSelecionada(item)}>
               <Text style={{
-                color: '#fff', padding: 10, backgroundColor: playlistescolhida?.id === item.id ? '#ff69b4' : '#333',
+                color: '#fff', padding: 10, backgroundColor: playlistSelecionada?.id === item.id ? '#ff69b4' : '#333',
                 borderRadius: 5, marginRight: 8
               }}>
                 {item.nome}
@@ -271,13 +268,12 @@ const TelaRecomendacoes = () => {
         data={recomendacoes}
         renderItem={({ item, index }) => (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
-          //adiciona imagem a cada musica de acordo com seu indice
             <Image
               source={{ uri: `https://via.placeholder.com/40/ff69b4/ffffff?text=${index + 1}` }}
               style={{ width: 40, height: 40, marginRight: 10 }}
             />
             <Text style={{ color: '#fff', flex: 1 }}>{item.nome}</Text>
-            <TouchableOpacity onPress={() => abriryoutube(item.nome)}>
+            <TouchableOpacity onPress={() => abriytb(item.nome)}>
               <Text style={{ color: '#1DB954', marginRight: 10 }}>Abrir no YouTube</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => adicionarMusicaNaPlaylist({ nome: item.nome })}>
@@ -291,41 +287,41 @@ const TelaRecomendacoes = () => {
   );
 };
 //tela da musica que foi escolhida
-const Telamusicaatual = ({ navigation }) => {
-  const [nomeplay, setplaylist] = useState(''); //pega nome da playlist e suas informacoes
-  const [playlists, setandoplaylists] = useState([]);
+const TelaCriarPlaylist = ({ navigation }) => {
+  const [nomePlaylist, setNomePlaylist] = useState(''); //pega nome da playlist e suas informacoes
+  const [playlists, setPlaylists] = useState([]);
 
   useEffect(() => {
-    const carregamento = async () => {
-      const salvas = await AsyncStorage.getItem('playlists'); //salva as playlists no banco de dados e transforma elas em objetos
-      setandoplaylists(salvas ? JSON.parse(salvas) : []);
+    const carregarPlaylists = async () => {
+      const playlistsSalvas = await AsyncStorage.getItem('playlists'); //salva as playlists no banco de dados e transforma elas em objetos
+      setPlaylists(playlistsSalvas ? JSON.parse(playlistsSalvas) : []);
     };
-    carregamento();
+    carregarPlaylists();
   }, []);
 
-  const musicaatual = async () => {
+  const criarPlaylist = async () => {
     Vibration.vibrate();
-    const novaPlaylist = { id: Date.now().toString(), nome: nomeplay, musicas: [] }; //pega as informacoes dentro da nova playlist e atualiza ela no banco de dados
-    const attplay = [...playlists, novaPlaylist];
-    setandoplaylists(attplay);
-    await AsyncStorage.setItem('playlists', JSON.stringify(attplay));
+    const novaPlaylist = { id: Date.now().toString(), nome: nomePlaylist, musicas: [] }; //pega as informacoes dentro da nova playlist e atualiza ela no banco de dados
+    const playlistsAtualizadas = [...playlists, novaPlaylist];
+    setPlaylists(playlistsAtualizadas);
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
     navigation.navigate('Playlists');
   };
 
-  return (
+  return ( //style da tela criar playlist
     <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
-      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>criaplay</Text>
+      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Criar Playlist</Text>
       <TextInput
         style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
         placeholder="Nome da Playlist"
-        onChangeText={setplaylist}
+        onChangeText={setNomePlaylist}
       />
-      <Button title="criar playlist" color="#ff69b4" onPress={musicaatual} />
+      <Button title="criar playlist" color="#ff69b4" onPress={criarPlaylist} />
     </View>
   );
 };
-
-const Telaadicionarmusica = ({ route, navigation }) => { //pega playlist e musicas dentro dela
+//adiciona musica na playlist
+const TelaAdicionarMusica = ({ route, navigation }) => { //pega playlist e musicas dentro dela
   const { playlist } = route.params;
   const [musicaNome, setMusicaNome] = useState('');
 
@@ -334,46 +330,46 @@ const Telaadicionarmusica = ({ route, navigation }) => { //pega playlist e music
     const novaMusica = { nome: musicaNome }; //adiciona musica na playlist e atualiza no banco de dados
     playlist.musicas.push(novaMusica);
 
-    const salvas = await AsyncStorage.getItem('playlists');
-    const attplay = JSON.parse(salvas).map(pl => pl.id === playlist.id ? playlist : pl);
-    await AsyncStorage.setItem('playlists', JSON.stringify(attplay));
+    const playlistsSalvas = await AsyncStorage.getItem('playlists');
+    const playlistsAtualizadas = JSON.parse(playlistsSalvas).map(pl => pl.id === playlist.id ? playlist : pl);
+    await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
     navigation.goBack();
   };
 
   return ( //estilo da tela de adicionar musica
     <View style={{ flex: 1, backgroundColor: '#121212', padding: 16 }}>
-      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>adicionar musica</Text>
+      <Text style={{ fontSize: 24, color: '#ff69b4', textAlign: 'center' }}>Adicionar Música</Text>
       <TextInput
         style={{ backgroundColor: '#fff', padding: 10, marginVertical: 8 }}
         placeholder="nome"
         onChangeText={setMusicaNome}
       />
-      <Button title="adicionar musica" color="#ff69b4" onPress={adicionarMusica} />
+      <Button title="+" color="#ff69b4" onPress={adicionarMusica} />
       <Button title="voltar" color="#ff69b4" onPress={() => navigation.goBack()} />
     </View>
   );
 };
 //telas principais pro usuario navegar de maneira mais clean
-const principais = () => {
+const Abas = () => {
   return (
-    <navegar.Navigator>
-      <navegar.Screen name="Playlists" component={playlists} />
-      <navegar.Screen name="Recomendações" component={TelaRecomendacoes} />
-    </navegar.Navigator>
+    <AbasNavegacao.Navigator>
+      <AbasNavegacao.Screen name="Playlists" component={TelaPlaylists} />
+      <AbasNavegacao.Screen name="Recomendações" component={TelaRecomendacoes} />
+    </AbasNavegacao.Navigator>
   );
 };
 //telas a serem navegadas
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="carregar">
-        <Stack.Screen name="carregar" component={carregar} options={{ headerShown: false }} />
-        <Stack.Screen name="Login" component={logar} />
-        <Stack.Screen name="Cadastro" component={cadastrar} />
-        <Stack.Screen name="navegar" component={principais} options={{ headerShown: false }} />
-        <Stack.Screen name="criaplay" component={Telamusicaatual} />
-        <Stack.Screen name="Detalhes Playlist" component={detalhesDaPlaylist} />
-        <Stack.Screen name="adicionar musica" component={Telaadicionarmusica} />
+      <Stack.Navigator initialRouteName="Telacarrega">
+        <Stack.Screen name="Telacarrega" component={Telacarrega} options={{ headerShown: false }} />
+        <Stack.Screen name="Login" component={Telalogar} />
+        <Stack.Screen name="Cadastro" component={TelaCadastro} />
+        <Stack.Screen name="AbasNavegacao" component={Abas} options={{ headerShown: false }} />
+        <Stack.Screen name="Criar Playlist" component={TelaCriarPlaylist} />
+        <Stack.Screen name="Detalhes Playlist" component={TelaDetalhesPlaylist} />
+        <Stack.Screen name="Adicionar Música" component={TelaAdicionarMusica} />
         <Stack.Screen name="Recomendações" component={TelaRecomendacoes} />
       </Stack.Navigator>
     </NavigationContainer>
