@@ -1,62 +1,110 @@
-#Introdução
-O aplicativo foi desenvolvido visando ser um app de músicas onde o usuário deve se cadastrar e realizar login para usufruir deste. Quando entramos, temos duas telas principais, sendo elas: Minhas playlists e Recomendações, dentro de "Minhas Playlists", podemos acessar playlists já criadas e as músicas dentro dela (podendo removê-la ou acessá-la no YouTube, clicando no link ao lado dela), também podendo adicionar novas músicas ou até mesmo novas playlists. Já na aba "Recomendações" temos algumas músicas fixas que possam interessar os usuários, podendo acessá-las no YouTube para conhecer um pouco mais sobre elas ou até mesmo selecionar uma playlist que esse acredite apropriada para a música e adicioná-la nessa playlist diretamente da aba recomendações.
+# Relatório Final
 
+Nome: Manuella Filipe Peres
+RA: 22.224.029-3
 
-#Motivação, objetivo e métodos
-A principal motivação do desenvolvimento do aplicativo foi aprender mais sobre React e aplicativos, consegui entender mais claramente sobre a linguagem e como funciona a lógica de um app de músicas, redirecionamentos, utilização de imagens, vibração ao clicar em botões, remoção e adição de itens, entre outros. Foi muito interessante e de extremo crescimento e desenvolvimento pessoal e profissional.
-Foi utilizado o site snack.expo para o desenvolvimento do app e alguns slides dos professores da matéria de Computação Móvel.
+# Introdução
 
+Este relatório apresenta o desenvolvimento e os resultados do projeto realizado para a disciplina CCP4670. O projeto consiste na criação de um aplicativo em React Native, abordando o tema de um software de músicas, onde o usuário poderá acessar suas músicas e playlists preferidas. O aplicativo visa permitir ao usuário se registrar, logar, criar uma nova playlist, acessar uma playlist já existente, adicionar novas músicas à playlist escolhida, removê-las, assim como acessar a aba de recomendações, onde ele poderá escutar a música (por meio do redirecionamento no YouTube) e adicioná-la na playlist de seu gosto, o público alvo são todos os amantes da música, que desejam conhecer novas músicas e ter suas playlists particulares para escutá-las no momento que quiserem.
 
-#Funcionalidades
-Primeiramente, o app conta com uma tela de carregamento como se estivesse sendo iniciado para o cliente.
-O aplicativo conta com login e cadastro, a partir do momento que o usuário estiver no banco de dados (feito utilizando AsyncStorage dentro do site snack.expo), ele poderá adentrar o app, onde terá duas abas, Minhas Playlists e Recomendações. Como explicado acima, dentro de Minhas Playlists o usuário pode criar novas playlists, adicionar novas músicas, além de removê-las quando quiser e acessá-las no YouTube com apenas um clique, cada música possui uma imagem representativa de seu número na playlist. Além disso, na aba Recomendações temos algumas músicas que possam ser interessantes ao usuário, podendo acessá-las no YouTube para checar e caso gostar, pode escolher a playlist diretamente da aba Recomendações e adicioná-la na playlist respectiva que o usuário deseja.
+# Motivação
 
+A escolha por desenvolver um aplicativo sobre um software de músicas surgiu a partir da ideia de eu ser uma grande amante de música, o que me inspirou a criar esse aplicativo para que eu possa salvar todas minhas músicas preferidas em playlists personalizadas para mim, além de acessar recomendações que eu posso escutar e ver se gosto, assim, adicionando-as nas minhas playlists.
+Música sempre foi algo que me deixou menos ansiosa, portanto, um aplicativo de música é algo que me deixaria mais calma por ter minhas músicas preferidas ao meu lado em todos os momentos, desestressando e além disso, tendo uma sensação de particularidade para minhas playlists.
 
-#Conclusão
-Foi um trabalho muito interessante onde pude aprender mais sobre aplicativos, uma curiosidade que sempre tive, além de aprimorar meus conhecimentos em React.js, uma linguagem muito inovadora e atual, que poderei utilizar em minha profissional com certeza. Agradeço aos professores Isaac Jesus da Silva e Luciano Rossi pelo apoio e pela oportunidade de desenvolver meus conhecimentos em programação com esse projeto, algo que irei recordar pelo resto de minha vida.
-#Fotos do projeto
+# Objetivo
 
-Tela de início (logo do app)
+O objetivo principal deste projeto é desenvolver um aplicativo mobile funcional em React Native que possui a opção de se registrar ou logar em um aplicativo de músicas, quando logado, o usuário vai para a aba de playlists, onde serão listadas todas as playlists salvas na memória da conta do usuário, ele pode escolher uma playlist específica e nela, adicionar, remover ou escutar a música por meio do redirecionamento no YouTube, além disso, o usuário pode remover uma playlist caso deseje. Na aba "recomendações", podemos ver algumas músicas pré-selecionadas que o usuário pode escutar clicando no link que irá levá-lo para seu respectivo redirecionamento no YouTube, assim, caso ele goste pode escolher uma playlist que mais se adeque à música e adicioná-la rapidamente à playlist escolhida.
 
-![image](https://github.com/user-attachments/assets/84014312-bacb-4fd1-b35a-7211a2d8ae8f)
+Além disso, o projeto busca:
+Implementar funcionalidades como [cadastro, login, adição de música, remoção de música e playlist, redirecionamento para o YouTube, adição de imagens na capa da música de acordo com seu índice, e vibração ao clicar em botões, além disso, utilizamos o AsyncStorage para salvar as informações em uma espécie de banco de dados]. Todas essas funcionalidades visam a melhor experiência ao usuário, visando um design interessante e fácil de utilizar.
 
-Registrar-se
+# Funcionalidades
 
-![image](https://github.com/user-attachments/assets/37470aee-c749-4178-b697-699f256fbbab)
+O aplicativo desenvolvido conta com as seguintes funcionalidades:
+
+[Cadastro e Login]: [Permite que o usuário se registre ou faça login no aplicativo para acessar suas playlists e recomendações personalizadas.]
+[Adicionar e Remover Músicas]: [O usuário pode adicionar músicas às playlists ou removê-las conforme desejar, mantendo a biblioteca organizada.]
+[Redirecionamento para o YouTube]: [Ao selecionar uma música, o usuário é redirecionado para o YouTube para ouvi-la diretamente na plataforma.]
+[Gerenciamento de Playlists]: [O usuário pode criar novas playlists, adicionar músicas a playlists existentes, ou remover playlists e músicas quando desejar.]
+[Recomendações de Músicas]: [Exibe uma lista de músicas pré-selecionadas que o usuário pode ouvir no YouTube e adicionar às suas playlists favoritas.]
+[Imagens na capa das músicas]: [Pega o índice da música e adiciona uma foto ao lado dela com o número respectivo da música.]
+[Vibração em Botões]: [Ao clicar nos botões do aplicativo, o celular vibra, melhorando a experiência de interação.]
+[Armazenamento com AsyncStorage]: [As informações de playlists e músicas são salvas no AsyncStorage, funcionando como um banco de dados.]
+
+# Conclusão
+
+A partir do desenvolvimento deste projeto, foi possível atingir meu principal objetivo que é entender mais sobre React.Js e desenvolvimento de aplicativos, além de aprender com as funcionalidades implementadas pude melhorar minha lógica de programação. Os principais desafios foram implementar a lógica de redirecionamento pro youtube pois demorei para ter uma solução para o problema, posteriormente implementando o nome da música no link de pesquisa do YouTube e assim, deu tudo certo no final.
+Um dos melhores aprendizados foi como aprimorar meus conhecimentos em JavaScript com React.js, além do desenvolvimento de aplicativos, conhecimento essencial para o mercado de trabalho atualmente, onde o mundo dos aplicativos está cada vez mais crescendo.
+Algumas melhorias que poderiam ser implementadas seriam o estudo da implementação de músicas no AsyncStorage em vez do redirecionamento, fazendo o usuário acessar a música diretamente do aplicativo.
+Essas ideias com certeza serão implementadas no futuro visando o desenvolvimento do meu conhecimento de React.JS para que eu aprimore cada vez mais minhas habilidades.
+Gostaria de agradeçer aos professores Isaac Jesus e Luciano Rossi pela oportunidade de aprender uma linguagem tão moderna e atual no mercado, me permitindo aprimorar minhas soft e hard skills com o projeto.
+
+# Imagens do projeto
+
+Tela de carregamento
+
+![image](https://github.com/user-attachments/assets/7c8fa7c0-8d88-4a1a-83ce-6145609ace10)
+
+Registrar
+
+![image](https://github.com/user-attachments/assets/8fc67d32-b2ac-4ec9-9198-1d1d66fa06ac)
 
 Login
 
-![image](https://github.com/user-attachments/assets/0ad23a5d-972c-4e5b-8f28-655305ca4d5b)
+![image](https://github.com/user-attachments/assets/0c949e4f-7bf5-49ba-be6a-42e12330856b)
 
-Minhas Playlists
+Tela de playlists com todas salvas no AsyncStorage
 
-![image](https://github.com/user-attachments/assets/b6e2ccd5-0bac-4e89-9125-e954e56ffa2d)
 
-Adicionar Música
-
-![image](https://github.com/user-attachments/assets/def75cc5-acb7-481d-84a9-aec96d5c3e34)
-
-Playlist após adicionar a música
-
-![image](https://github.com/user-attachments/assets/8778e1f1-8008-4842-8269-9d928173cadf)
-
-Após remover uma música
-
-![image](https://github.com/user-attachments/assets/460b9c2a-2903-43fc-9394-ddd14e72500e)
-
-Clicando em Abrir no Youtube
-
-![image](https://github.com/user-attachments/assets/187fd818-2294-49ce-9302-1017a7951045)
-
-Aba de Recomendações
-
-![image](https://github.com/user-attachments/assets/1f259bdf-b216-4bbf-95e7-2376bf72c93c)
-
-Selecionando a playlist que quero adicionar a música
-![image](https://github.com/user-attachments/assets/005ed02b-b78a-42c4-9b3d-f1f0476f2c46)
-Após adicionar
-![image](https://github.com/user-attachments/assets/20adcfe4-c36b-46d8-b922-64ccb6bf8d52)
+![image](https://github.com/user-attachments/assets/870fb7fa-87b4-4b1d-acd9-67b7e5d464fa)
 
 
 
+Excluindo uma das playlists
 
+![image](https://github.com/user-attachments/assets/565d5e5a-d3b2-4275-9fec-3806e9c8a939)
+
+
+Tela de criar playlist
+
+![image](https://github.com/user-attachments/assets/761ef1a2-5584-4c0c-82c8-8ce6022ae94d)
+
+Adicionando nova playlist
+
+![image](https://github.com/user-attachments/assets/af9b59d7-2e07-4148-b3b7-b943095026b9)
+
+Clicando na playlist especifica
+
+![image](https://github.com/user-attachments/assets/a7fa46da-fb58-4ce0-9bbf-4787072d66bd)
+
+Clicando no redirecionamento pro youtube
+
+![image](https://github.com/user-attachments/assets/701889f4-3593-4e44-a009-7a63b51019a6)
+
+Adicionando nova musica
+
+![image](https://github.com/user-attachments/assets/7327a7f8-4fae-49ce-b589-bc5ef982d697)
+
+Após adicioná-la
+
+![image](https://github.com/user-attachments/assets/69451ccb-5ca1-4148-add9-098927e8bd15)
+
+Retirando a música
+
+![image](https://github.com/user-attachments/assets/c7128b7b-8c61-4410-a7af-2d4c57fe0882)
+
+
+Tela de recomendações
+
+![image](https://github.com/user-attachments/assets/b93dd479-44d2-4622-ab8c-8f03b22f9311)
+
+
+Selecionando uma playlist
+
+![image](https://github.com/user-attachments/assets/a0920dfb-3c6c-4bb7-8163-02b287e9c03a)
+
+
+Após adicioná-la
+
+![image](https://github.com/user-attachments/assets/28426458-8861-44c7-ab5f-7c96ea6e17d9)
