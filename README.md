@@ -23,14 +23,14 @@ Implementar funcionalidades como [cadastro, login, adição de música, remoçã
 
 O aplicativo desenvolvido conta com as seguintes funcionalidades:
 
-[Cadastro e Login]: [Permite que o usuário se registre ou faça login no aplicativo para acessar suas playlists e recomendações personalizadas.]
-[Adicionar e Remover Músicas]: [O usuário pode adicionar músicas às playlists ou removê-las conforme desejar, mantendo a biblioteca organizada.]
-[Redirecionamento para o YouTube]: [Ao selecionar uma música, o usuário é redirecionado para o YouTube para ouvi-la diretamente na plataforma.]
-[Gerenciamento de Playlists]: [O usuário pode criar novas playlists, adicionar músicas a playlists existentes, ou remover playlists e músicas quando desejar.]
-[Recomendações de Músicas]: [Exibe uma lista de músicas pré-selecionadas que o usuário pode ouvir no YouTube e adicionar às suas playlists favoritas.]
-[Imagens na capa das músicas]: [Pega o índice da música e adiciona uma foto ao lado dela com o número respectivo da música.]
-[Vibração em Botões]: [Ao clicar nos botões do aplicativo, o celular vibra, melhorando a experiência de interação.]
-[Armazenamento com AsyncStorage]: [As informações de playlists e músicas são salvas no AsyncStorage, funcionando como um banco de dados.]
+Cadastro e Login: Permite que o usuário se registre ou faça login no aplicativo para acessar suas playlists e recomendações personalizadas.
+Adicionar e Remover Músicas: O usuário pode adicionar músicas às playlists ou removê-las conforme desejar, mantendo a biblioteca organizada.
+Redirecionamento para o YouTube: Ao selecionar uma música, o usuário é redirecionado para o YouTube para ouvi-la diretamente na plataforma.
+Gerenciamento de Playlists: O usuário pode criar novas playlists, adicionar músicas a playlists existentes, ou remover playlists e músicas quando desejar.
+Recomendações de Músicas: Exibe uma lista de músicas pré-selecionadas que o usuário pode ouvir no YouTube e adicionar às suas playlists favoritas.
+Imagens na capa das músicas:Pega o índice da música e adiciona uma foto ao lado dela com o número respectivo da música.
+Vibração em Botões: Ao clicar nos botões do aplicativo, o celular vibra, melhorando a experiência de interação.
+Armazenamento com AsyncStorage: As informações de playlists e músicas são salvas no AsyncStorage, funcionando como um banco de dados.
 
 # Conclusão
 
