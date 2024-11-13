@@ -146,12 +146,12 @@ const TelaDetalhesPlaylist = ({ route, navigation }) => {
     const playlistsSalvas = await AsyncStorage.getItem('playlists'); //pega playlists salvas
     const playlistsAtualizadas = JSON.parse(playlistsSalvas).map(pl => { //atualiza apos remover (confere se eh essa mesma ou nao antes de remover)
       if (pl.id === playlist.id) {
-        return { ...pl, musicas: pl.musicas.filter(musica => musica.nome !== nomeMusica) };
+        return { ...pl, musicas: pl.musicas.filter(musica => musica.nome !== nomeMusica) }; //acha a musica e remove ela por meio do filtro
       }
       return pl;
     });
     await AsyncStorage.setItem('playlists', JSON.stringify(playlistsAtualizadas));
-    setMusicas(musicas.filter(musica => musica.nome !== nomeMusica)); //avisa que musica foi removida
+    setMusicas(musicas.filter(musica => musica.nome !== nomeMusica)); //atualiza a playlist sem a musica
   };
 //pega nome que foi inserido e coloca no link pra redirecionar pro youtube
   const abriytb = (nomeMusica) => {
@@ -169,7 +169,7 @@ const TelaDetalhesPlaylist = ({ route, navigation }) => {
         renderItem={({ item, index }) => (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
             <Image
-              source={{ uri: `https://via.placeholder.com/40/ff69b4/ffffff?text=${index + 1}` }}
+              source={{ uri: `https://via.placeholder.com/40/ff69b4/ffffff?text=${index + 1}` }} //atualiza a imagem de acordo com seu indice
               style={{ width: 40, height: 40, marginRight: 10 }}
             />
             <Text style={{ color: '#ffffff', flex: 1 }}>{item.nome}</Text>
